@@ -163,7 +163,9 @@ async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE, user_messa
     }
     
     try:
-        response = requests.post(OLLAMA_API_URL, json=payload, timeout=300)
+        # Erhöhtes Timeout (15 Minuten), um auf schwachen VPS (ohne GPU) 
+        # Abstürze bei gleichzeitiger Audio-Transkription zu vermeiden
+        response = requests.post(OLLAMA_API_URL, json=payload, timeout=900)
         response.raise_for_status()
         bot_reply = response.json().get("response", "Entschuldigung, ich konnte gerade keine klare Antwort formulieren.")
         
