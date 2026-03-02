@@ -131,6 +131,22 @@ if [ ! -f .env ]; then
     fi
     echo ""
     
+    # Remote Modell-Check einbauen
+    if [[ "$OLLAMA_IP" != "localhost" && "$OLLAMA_IP" != "127.0.0.1" ]]; then
+        echo -e "${YELLOW}Frage installierte Modelle von deinem Remote-Server ($OLLAMA_IP) ab...${NC}"
+        # Parsen der JSON Antwort mittel grep und cut um Abhängigkeiten wie jq zu vermeiden
+        REMOTE_MODELS=$(curl -s --connect-timeout 3 "$OLLAMA_BASE_URL/api/tags" | grep -o '"name":"[^"]*"' | cut -d'"' -f4 || echo "")
+        
+        if [ -n "$REMOTE_MODELS" ]; then
+            echo -e "${GREEN}Folgende Modelle sind aktuell auf deinem Windows-PC einsatzbereit:${NC}"
+            echo "$REMOTE_MODELS" | sed 's/^/> /'
+            echo -e "\n${YELLOW}❗️ WICHTIG: Bitte wähle gleich im nächsten Schritt zwingend eines dieser Modelle aus (oder installiere das gewünschte Modell vorher via 'ollama pull' auf deinem Windows-PC).${NC}\n"
+        else
+            echo -e "${RED}Konnte die installierten Modelle nicht vom Windows-PC abrufen. Wurde OLLAMA_HOST=0.0.0.0 gesetzt und Ollama neu gestartet?${NC}\n"
+        fi
+        sleep 3
+    fi
+    
     # Lade die offizielle Modelli-Liste von Ollama (vereinfacht über cURL + grep)
     # Da das direkte HTML-Parsing auf bash fehleranfällig ist, bieten wir eine solide 
     # vordefinierte Liste aktueller "Best-Ofs" an, die sofort funktionieren.
