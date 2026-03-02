@@ -57,8 +57,28 @@ fi
 
 cd "$INSTALL_DIR"
 
-# 4. Konfiguration abfragen
-echo -e "${YELLOW}[4/5] Konfiguration${NC}"
+# 4. Architektur-Design abfragen
+echo -e "${YELLOW}[4/6] Architektur-Konfiguration${NC}"
+echo "Möchtest du, dass der Chatbot alles lokal auf diesem Rechner berechnet,"
+echo "oder möchtest du die KI-Berechnungen (Ollama) an einen separaten,"
+echo "leistungsstarken PC im Netzwerk (Remote Server) auslagern?"
+echo ""
+echo "👉 Drücke einfach ENTER, wenn alles normal (lokal) installiert werden soll."
+echo "👉 Gib eine IP (z.B. 192.168.178.50) ein, wenn du einen Remote-Ollama Host nutzt."
+read -p "Ollama Server IP [Standard: localhost]: " OLLAMA_IP < /dev/tty
+
+OLLAMA_IP=${OLLAMA_IP:-"localhost"}
+OLLAMA_PORT="11434"
+OLLAMA_BASE_URL="http://${OLLAMA_IP}:${OLLAMA_PORT}"
+
+if [[ "$OLLAMA_IP" == "localhost" || "$OLLAMA_IP" == "127.0.0.1" ]]; then
+    echo -e "${GREEN}-> Klassische lokale Installation gewählt.${NC}"
+else
+    echo -e "${GREEN}-> Remote-Architektur gewählt. KI tickt auf: $OLLAMA_BASE_URL${NC}"
+fi
+
+# 5. Bot Konfiguration abfragen
+echo -e "\n${YELLOW}[5/6] Bot-Konfiguration${NC}"
 
 # Standard-Modell, gemma:2b ist sehr schnell und gut für erste Tests auf kleinen Servern
 if [ -f .env ]; then
@@ -133,18 +153,6 @@ if [ ! -f .env ]; then
     
     echo -e "${GREEN}Gewähltes Modell: $OLLAMA_MODEL${NC}"
     
-    echo -e "\n${YELLOW}Wo läuft Ollama?${NC}"
-    echo "Standardmäßig sucht der Bot Ollama lokal auf diesem Server (localhost)."
-    echo "Wenn du einen starken Windows-PC oder anderen Rechner im Netzwerk nutzt,"
-    echo "gib hier dessen IP-Adresse ein (z.B. 192.168.178.50). Lass das Feld leer für 'localhost'."
-    read -p "Ollama Server IP (Enter für localhost): " OLLAMA_IP < /dev/tty
-    
-    OLLAMA_IP=${OLLAMA_IP:-"localhost"}
-    OLLAMA_PORT="11434" # Standard Ollama Port
-    OLLAMA_BASE_URL="http://${OLLAMA_IP}:${OLLAMA_PORT}"
-
-    echo -e "${GREEN}Verwende Ollama unter: $OLLAMA_BASE_URL${NC}"
-
     # Erstelle die .env Datei
     echo "TELEGRAM_TOKEN=$TELEGRAM_TOKEN" > .env
     echo "OLLAMA_MODEL=$OLLAMA_MODEL" >> .env
@@ -168,8 +176,8 @@ else
     echo -e "Überspringe lokalen Modell-Download. Bitte stelle sicher, dass die Modelle auf dem Host-Rechner via 'ollama pull $OLLAMA_MODEL' und 'ollama pull nomic-embed-text' manuell heruntergeladen wurden!"
 fi
 
-# 5. Python-Umgebung und System-Dienst (systemd)
-echo -e "${YELLOW}[5/5] Richte Python-Umgebung und Systemdienst ein...${NC}"
+# 6. Python-Umgebung und System-Dienst (systemd)
+echo -e "${YELLOW}[6/6] Richte Python-Umgebung und Systemdienst ein...${NC}"
 
 # Virtuelle Umgebung (VENV) erstellen und Pakete installieren
 if [ -f "requirements.txt" ]; then
