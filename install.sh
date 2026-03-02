@@ -49,14 +49,8 @@ INSTALL_DIR="$HOME/ST_Chatbot"
 echo -e "${YELLOW}[3/5] Richte Projektverzeichnis unter $INSTALL_DIR ein...${NC}"
 
 if [ ! -d "$INSTALL_DIR" ]; then
-    echo "Bitte gib jetzt oder später die GitHub Repository URL an, um das Projekt zu klonen:"
-    read -p "GitHub Repository URL (oder drücke Enter für leeren Ordner): " REPO_URL < /dev/tty
-    if [ -n "$REPO_URL" ]; then
-        git clone "$REPO_URL" "$INSTALL_DIR"
-    else
-        mkdir -p "$INSTALL_DIR"
-        echo "Leeres Verzeichnis erstellt. Du musst die Projektdateien später manuell dorthin kopieren."
-    fi
+    echo "Klone das ST_Chatbot Repository von GitHub..."
+    git clone "https://github.com/schickal1985/ST_Chatbot.git" "$INSTALL_DIR"
 else
     echo "Verzeichnis existiert bereits. Überspringe Klonen."
 fi
@@ -84,19 +78,39 @@ if [ ! -f .env ]; then
     echo "Diesen bekommst du direkt in Telegram beim @BotFather."
     read -p "Gib deinen Telegram Bot Token ein: " TELEGRAM_TOKEN < /dev/tty
     
-    echo "Welches KI-Modell möchtest du verwenden?"
-    echo "Lade aktuell beliebteste Modelle..."
+    # System-Check (RAM) für Modell-Empfehlung
+    echo -e "\n${YELLOW}Führe System-Check aus (RAM)...${NC}"
+    TOTAL_MEM=$(free -m | awk '/^Mem:/{print $2}')
+    TOTAL_MEM_GB=$(awk "BEGIN {printf \"%.1f\", $TOTAL_MEM/1024}")
+    
+    echo -e "Erkannter Arbeitsspeicher: ${GREEN}${TOTAL_MEM_GB} GB RAM${NC}\n"
+    
+    echo -e "${YELLOW}Welches KI-Modell möchtest du für deinen Server verwenden?${NC}"
+    if [ "$TOTAL_MEM" -lt 3500 ]; then
+        echo -e "${RED}Achtung: Dein System hat weniger als 4 GB RAM. Das ist das absolute Minimum.${NC}"
+        echo -e "💡 Empfehlung: Option 1 (${GREEN}gemma:2b${NC}) oder Option 5 (${GREEN}qwen2:7b${NC} - könnte langsam sein)"
+    elif [ "$TOTAL_MEM" -lt 7000 ]; then
+        echo -e "Dein System liegt im mittleren Bereich (4-8 GB RAM)."
+        echo -e "💡 Empfehlung: Option 1 (${GREEN}gemma:2b${NC} - sehr schnell) oder Option 2 (${GREEN}llama3${NC} - lastet RAM voll aus)"
+    elif [ "$TOTAL_MEM" -lt 15000 ]; then
+        echo -e "Dein System hat 8-16 GB RAM. Hervorragend für starke Modelle!"
+        echo -e "💡 Empfehlung: Option 7 (${GREEN}llama3.1${NC}) oder Option 6 (${GREEN}gemma2${NC})"
+    else
+        echo -e "Dein System ist ein echtes Biest! Du hast über 16 GB RAM."
+        echo -e "💡 Empfehlung: Option 7 (${GREEN}llama3.1${NC}) oder Option 6 (${GREEN}gemma2${NC})"
+    fi
+    echo ""
     
     # Lade die offizielle Modelli-Liste von Ollama (vereinfacht über cURL + grep)
     # Da das direkte HTML-Parsing auf bash fehleranfällig ist, bieten wir eine solide 
     # vordefinierte Liste aktueller "Best-Ofs" an, die sofort funktionieren.
-    echo "1) gemma:2b       (Standard: Sehr schnell, perfekt für kleine VPS, 4GB RAM)"
-    echo "2) llama3         (Meta's 8B Modell, stark im Reasoning, 8GB RAM empfohlen)"
-    echo "3) mistral        (Der Open-Source Klassiker, 7B Parameter, 8GB RAM)"
+    echo "1) gemma:2b       (Googles kleines 2B Modell - rasend schnell)"
+    echo "2) llama3         (Meta's 8B Modell, stark im Reasoning)"
+    echo "3) mistral        (Der Open-Source Klassiker, 7B Parameter)"
     echo "4) phi3           (Microsoft's winziges Modell, 3.8B, sehr gut bei Logik)"
     echo "5) qwen2:7b       (Alibabas 7B Modell, extrem gut in Deutsch)"
-    echo "6) gemma2         (Googles neues 9B Modell, extrem hohe Qualität, 16GB RAM)"
-    echo "7) llama3.1       (Meta's neuestes Modell, 8B, 8GB RAM)"
+    echo "6) gemma2         (Googles neues 9B Modell, extrem hohe Qualität)"
+    echo "7) llama3.1       (Meta's neuestes Modell, 8B)"
     echo "8) Manuelle Eingabe (Ein beliebiges anderes Modell von ollama.com eintragen)"
     
     read -p "Wähle eine Option [1-8, Standard: 1]: " MODEL_CHOICE < /dev/tty
