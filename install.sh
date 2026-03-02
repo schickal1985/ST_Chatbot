@@ -133,21 +133,40 @@ if [ ! -f .env ]; then
     
     echo -e "${GREEN}Gewähltes Modell: $OLLAMA_MODEL${NC}"
     
+    echo -e "\n${YELLOW}Wo läuft Ollama?${NC}"
+    echo "Standardmäßig sucht der Bot Ollama lokal auf diesem Server (localhost)."
+    echo "Wenn du einen starken Windows-PC oder anderen Rechner im Netzwerk nutzt,"
+    echo "gib hier dessen IP-Adresse ein (z.B. 192.168.178.50). Lass das Feld leer für 'localhost'."
+    read -p "Ollama Server IP (Enter für localhost): " OLLAMA_IP < /dev/tty
+    
+    OLLAMA_IP=${OLLAMA_IP:-"localhost"}
+    OLLAMA_PORT="11434" # Standard Ollama Port
+    OLLAMA_BASE_URL="http://${OLLAMA_IP}:${OLLAMA_PORT}"
+
+    echo -e "${GREEN}Verwende Ollama unter: $OLLAMA_BASE_URL${NC}"
+
     # Erstelle die .env Datei
     echo "TELEGRAM_TOKEN=$TELEGRAM_TOKEN" > .env
     echo "OLLAMA_MODEL=$OLLAMA_MODEL" >> .env
-    echo "OLLAMA_API_URL=http://localhost:11434/api/generate" >> .env
-    echo "OLLAMA_EMBED_URL=http://localhost:11434/api/embeddings" >> .env
+    echo "OLLAMA_API_URL=${OLLAMA_BASE_URL}/api/generate" >> .env
+    echo "OLLAMA_EMBED_URL=${OLLAMA_BASE_URL}/api/embeddings" >> .env
     echo "OLLAMA_EMBED_MODEL=nomic-embed-text" >> .env
     echo -e "${GREEN}.env Datei wurde erfolgreich erstellt.${NC}"
 fi
 
-# Modell herunterladen
-echo -e "${YELLOW}Lade das Chat-Modell ($OLLAMA_MODEL) herunter...${NC}"
-ollama pull "$OLLAMA_MODEL"
+# Modelle herunterladen (nur wenn Ollama lokal läuft!)
+# Bezieht die frisch genierte env var
+source .env
+if [[ "$OLLAMA_API_URL" == *"localhost"* || "$OLLAMA_API_URL" == *"127.0.0.1"* ]]; then
+    echo -e "${YELLOW}Lade das Chat-Modell ($OLLAMA_MODEL) lokal herunter...${NC}"
+    ollama pull "$OLLAMA_MODEL"
 
-echo -e "${YELLOW}Lade das Embedding-Modell (nomic-embed-text) für das Vektor-Gedächtnis herunter...${NC}"
-ollama pull nomic-embed-text
+    echo -e "${YELLOW}Lade das Embedding-Modell (nomic-embed-text) lokal herunter...${NC}"
+    ollama pull nomic-embed-text
+else
+    echo -e "${YELLOW}Remote-Ollama konfiguriert ($OLLAMA_API_URL).${NC}"
+    echo -e "Überspringe lokalen Modell-Download. Bitte stelle sicher, dass die Modelle auf dem Host-Rechner via 'ollama pull $OLLAMA_MODEL' und 'ollama pull nomic-embed-text' manuell heruntergeladen wurden!"
+fi
 
 # 5. Python-Umgebung und System-Dienst (systemd)
 echo -e "${YELLOW}[5/5] Richte Python-Umgebung und Systemdienst ein...${NC}"
