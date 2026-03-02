@@ -59,7 +59,17 @@ cd "$INSTALL_DIR"
 echo -e "${YELLOW}[4/5] Konfiguration${NC}"
 
 # Standard-Modell, gemma:2b ist sehr schnell und gut für erste Tests auf kleinen Servern
-DEFAULT_MODEL="gemma:2b"
+if [ -f .env ]; then
+    echo -e "${YELLOW}Es existiert bereits eine Konfiguration (.env).${NC}"
+    read -p "Möchtest du diese bestehende Konfiguration komplett löschen und neu anlegen? (j/N): " OVERWRITE_ENV < /dev/tty
+    if [[ "$OVERWRITE_ENV" =~ ^[Jj] ]]; then
+        rm -f .env
+        echo "Bestehende .env gelöscht."
+    else
+        echo -e "${GREEN}Bestehende Konfiguration wird beibehalten.${NC}"
+        source .env
+    fi
+fi
 
 if [ ! -f .env ]; then
     echo "Um den Telegram Bot zu betreiben, brauchst du einen Bot Token."
@@ -105,11 +115,9 @@ if [ ! -f .env ]; then
     echo "TELEGRAM_TOKEN=$TELEGRAM_TOKEN" > .env
     echo "OLLAMA_MODEL=$OLLAMA_MODEL" >> .env
     echo "OLLAMA_API_URL=http://localhost:11434/api/generate" >> .env
+    echo "OLLAMA_EMBED_URL=http://localhost:11434/api/embeddings" >> .env
+    echo "OLLAMA_EMBED_MODEL=nomic-embed-text" >> .env
     echo -e "${GREEN}.env Datei wurde erfolgreich erstellt.${NC}"
-else
-    echo -e "${GREEN}Konfiguration existiert bereits (.env).${NC}"
-    # Modell auslesen, um es zu pullen
-    source .env
 fi
 
 # Modell herunterladen
