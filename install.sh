@@ -83,8 +83,11 @@ else
 fi
 
 # Modell herunterladen
-echo -e "${YELLOW}Lade das KI-Modell ($OLLAMA_MODEL) herunter. Dies kann einige Minuten dauern...${NC}"
+echo -e "${YELLOW}Lade das Chat-Modell ($OLLAMA_MODEL) herunter...${NC}"
 ollama pull "$OLLAMA_MODEL"
+
+echo -e "${YELLOW}Lade das Embedding-Modell (nomic-embed-text) für das Vektor-Gedächtnis herunter...${NC}"
+ollama pull nomic-embed-text
 
 # 5. Python-Umgebung und System-Dienst (systemd)
 echo -e "${YELLOW}[5/5] Richte Python-Umgebung und Systemdienst ein...${NC}"
