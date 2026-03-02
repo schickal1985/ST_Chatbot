@@ -75,17 +75,19 @@ def perform_web_search(query: str, max_results=3) -> str:
     """Führt eine DuckDuckGo-Suche aus und gibt die Ergebnisse als Text zurück."""
     try:
         with DDGS() as ddgs:
+            # duckduckgo_search requires max_results to be explicitly passed, 
+            # and might block or throw if the network fails.
             results = ddgs.text(query, max_results=max_results)
             if not results:
                 return "Keine Suchergebnisse gefunden."
             
             search_text = "Aktuelle Informationen aus dem Internet (DuckDuckGo):\n"
             for r in results:
-                search_text += f"- {r['title']}: {r['body']}\n"
+                search_text += f"- {r.get('title', '')}: {r.get('body', '')}\n"
             return search_text
     except Exception as e:
-        logger.error(f"Fehler bei der Web-Suche: {e}")
-        return "Fehler beim Abrufen von aktuellen Internetdaten."
+        logger.error(f"Kritischer Fehler bei der Web-Suche aus DDGS: {e}")
+        return ""
 
 def needs_web_search(text: str) -> bool:
     """Simpler heuristischer Check, ob die Frage eine Web-Suche erfordert."""
@@ -101,7 +103,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Problemen oder einfach für einen verständnisvollen Dialog. Ich höre dir zu und helfe dir gerne.\n\n"
         "Wie darf ich dir heute behilflich sein?"
     )
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=welcome_text)
+    try:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=welcome_text)
+    except Exception as e:
+        logger.error(f"Fehler beim Senden der Start-Nachricht: {e}")
 
 async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
@@ -129,9 +134,14 @@ async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # 2. Web-Suche auslösen (falls nötig)
     search_context = ""
-    if needs_web_search(user_message):
-        logger.info(f"Führe Web-Suche aus für: {user_message}")
-        search_context = perform_web_search(user_message) + "\n\n"
+    try:
+        if needs_web_search(user_message):
+            logger.info(f"Führe Web-Suche aus für: {user_message}")
+            result = perform_web_search(user_message)
+            if result:
+                search_context = result + "\n\n"
+    except Exception as e:
+         logger.error(f"Fehler in der Web-Such-Logik: {e}")
 
     # 3. Prompt zusammenbauen
     # Den System-Prompt um die dynamischen Kontext-Blöcke erweitern
@@ -167,11 +177,15 @@ async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     except requests.exceptions.Timeout:
         bot_reply = "Entschuldige bitte, ich habe für die Antwort etwas zu lange gebraucht (Timeout). Frag mich gerne noch einmal."
+        logger.error("Ollama API Timeout erreicht!")
     except Exception as e:
-        logger.error(f"Fehler bei der Verbindung zu Ollama: {e}")
+        logger.error(f"Fehler bei der Verbindung zu Ollama oder RAG Verarbeitung: {e}")
         bot_reply = "Es tut mir leid, es gab gerade ein kleines technisches Problem bei mir. Ich bin gleich wieder einsatzbereit."
         
-    await context.bot.send_message(chat_id=chat_id, text=bot_reply)
+    try:
+        await context.bot.send_message(chat_id=chat_id, text=bot_reply)
+    except Exception as e:
+        logger.error(f"Fehler beim Senden der Telegram-Nachricht: {e}")
 
 async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Verarbeitet hochgeladene Dokumente und fügt sie in das RAG-Gedächtnis ein."""
