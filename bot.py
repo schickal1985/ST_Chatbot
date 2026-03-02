@@ -297,6 +297,9 @@ async def handle_audio(update: Update, context: ContextTypes.DEFAULT_TYPE):
         loop = asyncio.get_event_loop()
         
         def transcribe_audio():
+            # Stelle sicher, dass Whisper den ffmpeg Binary-Pfad im System findet
+            os.environ["PATH"] += os.pathsep + "/usr/bin" + os.pathsep + "/usr/local/bin"
+            
             model = whisper.load_model("base") # "base" oder "tiny" für VPS
             result = model.transcribe(tmp_path, language="de") # Optimiere auf Deutsch
             return result["text"]
