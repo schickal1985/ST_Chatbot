@@ -198,10 +198,10 @@ sudo systemctl restart st_chatbot || echo "Konnte Dienst nicht starten. Eventuel
 
 # Admin Tool und Auto-Updater ausführbar machen (falls vorhanden)
 if [ -f "$INSTALL_DIR/admin.sh" ]; then
-    chmod +x "$INSTALL_DIR/admin.sh"
+    sudo chmod 755 "$INSTALL_DIR/admin.sh"
 fi
 if [ -f "$INSTALL_DIR/update.sh" ]; then
-    chmod +x "$INSTALL_DIR/update.sh"
+    sudo chmod 755 "$INSTALL_DIR/update.sh"
 fi
 
 echo ""
