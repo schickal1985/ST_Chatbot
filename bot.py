@@ -325,7 +325,7 @@ async def handle_audio(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if "ffmpeg" in str(e).lower() or "ffprobe" in str(e).lower():
             await context.bot.send_message(chat_id=chat_id, text="Entschuldigung, auf meinem Server fehlt das Programm 'ffmpeg', um Sprachnachrichten lesen zu können. Bitte den Admin kontaktieren.")
         else:
-            await context.bot.send_message(chat_id=chat_id, text="Entschuldigung, ich konnte diese Sprachnachricht leider nicht verarbeiten.")
+            await context.bot.send_message(chat_id=chat_id, text=f"Entschuldigung, ich konnte diese Sprachnachricht leider nicht verarbeiten. (DEBUG: {str(e)})")
     finally:
          if os.path.exists(tmp_path):
              os.remove(tmp_path)
