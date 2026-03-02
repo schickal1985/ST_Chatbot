@@ -29,7 +29,7 @@ cd "$INSTALL_DIR"
 echo -e "${YELLOW}[1/3] Hole die neuesten Änderungen von GitHub...${NC}"
 # Verwirft lokale Änderungen an den getrackten Dateien (außer .env, die ignoriert wird)
 git fetch origin main
-git hard reset origin/main || git pull origin main
+git reset --hard origin/main || git pull origin main
 
 echo -e "${YELLOW}[2/3] Aktualisiere Python-Abhängigkeiten...${NC}"
 if [ -d "venv" ] && [ -f "requirements.txt" ]; then
