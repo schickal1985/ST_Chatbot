@@ -13,6 +13,7 @@ import docx
 import pandas as pd
 import whisper
 import asyncio
+import traceback
 
 # Konfiguration des Loggings
 logging.basicConfig(
@@ -314,8 +315,14 @@ async def handle_audio(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await respond(update, context)
 
     except Exception as e:
-        logger.error(f"Fehler bei der Audio-Transkription: {e}")
-        await context.bot.send_message(chat_id=chat_id, text="Entschuldigung, ich konnte diese Sprachnachricht leider nicht verarbeiten.")
+        error_details = traceback.format_exc()
+        logger.error(f"Fehler bei der Audio-Transkription: {e}\nDetails: {error_details}")
+        
+        # Hilfreicher Fehlerhinweis für den Nutzer, falls ffmpeg auf dem Betriebssystem fehlt
+        if "ffmpeg" in str(e).lower() or "ffprobe" in str(e).lower():
+            await context.bot.send_message(chat_id=chat_id, text="Entschuldigung, auf meinem Server fehlt das Programm 'ffmpeg', um Sprachnachrichten lesen zu können. Bitte den Admin kontaktieren.")
+        else:
+            await context.bot.send_message(chat_id=chat_id, text="Entschuldigung, ich konnte diese Sprachnachricht leider nicht verarbeiten.")
     finally:
          if os.path.exists(tmp_path):
              os.remove(tmp_path)
