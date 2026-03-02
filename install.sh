@@ -17,9 +17,17 @@ echo -e "${GREEN}        Star Trek SOUL Chatbot Installer         ${NC}"
 echo -e "${BLUE}=================================================${NC}"
 echo ""
 
-# 1. Systemabhängigkeiten installieren
-echo -e "${YELLOW}[1/5] Installiere Systemabhängigkeiten...${NC}"
+# 1. System aktualisieren & Systemabhängigkeiten installieren
+echo -e "${YELLOW}[1/5] Aktualisiere Ubuntu-System (apt-get update & upgrade)...${NC}"
+echo -e "Hinweis: Das System wird zunächst komplett auf den neuesten Stand gebracht."
+echo -e "         Dies beugt Paket-Konflikten vor, kann aber einen Moment dauern."
+sleep 2
+
 sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get dist-upgrade -y
+
+echo -e "\n${YELLOW}Installiere benötigte Basis-Programme (Python, Git, Curl)...${NC}"
 sudo apt-get install -y python3 python3-pip python3-venv curl git
 
 # 2. Ollama überprüfen und ggf. installieren
