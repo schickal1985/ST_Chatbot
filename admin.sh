@@ -100,13 +100,12 @@ case $OPTION in
         ;;
     6)
         echo -e "\n${YELLOW}Starte Auto-Updater...${NC}"
-        if [ -x "./update.sh" ]; then
-            # Führe das Update-Skript aus. Da update.sh am Ende ggf. den Server 
-            # neu startet oder das Skript beendet, verlassen wir danach das Admin-Menü.
-            ./update.sh
+        if [ -f "$INSTALL_DIR/update.sh" ]; then
+            # Führe das Update-Skript explizit mit bash aus, um Ausführungsrechte-Probleme zu umgehen.
+            bash "$INSTALL_DIR/update.sh"
             exit 0
         else
-            echo -e "${RED}Fehler: update.sh nicht gefunden oder nicht ausführbar.${NC}"
+            echo -e "${RED}Fehler: update.sh nicht in $INSTALL_DIR gefunden.${NC}"
         fi
         ;;
     7)
