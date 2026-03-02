@@ -11,6 +11,8 @@ import tempfile
 import pypdf
 import docx
 import pandas as pd
+import whisper
+import asyncio
 
 # Konfiguration des Loggings
 logging.basicConfig(
@@ -263,6 +265,61 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
 
+async def handle_audio(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Verarbeitet Sprachnachrichten und Audio-Dateien und wandelt sie in Text um."""
+    chat_id = str(update.effective_chat.id)
+    
+    # Prüfen, ob es eine Sprachnachricht (Voice) oder allgemeines Audio ist
+    if update.message.voice:
+        file_obj = await update.message.voice.get_file()
+        file_ext = ".ogg" # Telegram voice messages are typically ogg
+    elif update.message.audio:
+        file_obj = await update.message.audio.get_file()
+        file_ext = ".mp3" # Generic fallback 
+    else:
+        return
+
+    await context.bot.send_message(chat_id=chat_id, text="🎵 Sprachnachricht empfangen. Ich höre mir das kurz an...")
+    
+    with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
+        tmp_path = tmp_file.name
+
+    try:
+        await file_obj.download_to_drive(tmp_path)
+        
+        # Whisper benötigt CPU/RAM. Wir laden das Base-Modell, das relativ klein (ca 150MB) 
+        # und schnell auf dem Ubuntu Server ist
+        logger.info(f"Starte Whisper Transkription für Chat: {chat_id}")
+        
+        # In einem echten asynchronen Bot-Setup sollte Whisper idealerweise in einem ThreadPool
+        # laufen, um den Main-Loop nicht zu blockieren.
+        loop = asyncio.get_event_loop()
+        
+        def transcribe_audio():
+            model = whisper.load_model("base") # "base" oder "tiny" für VPS
+            result = model.transcribe(tmp_path, language="de") # Optimiere auf Deutsch
+            return result["text"]
+
+        transcribed_text = await loop.run_in_executor(None, transcribe_audio)
+        
+        if not transcribed_text.strip():
+             await context.bot.send_message(chat_id=chat_id, text="Ich konnte auf der Aufnahme leider nichts verstehen.")
+             return
+
+        logger.info(f"Transkription erfolgreich: {transcribed_text}")
+        
+        # Wir tun so, als hätte der Nutzer diesen Text geschrieben und leiten ihn an den normalen Chat weiter
+        update.message.text = transcribed_text
+        await context.bot.send_message(chat_id=chat_id, text=f"_(Erkannter Text: \"{transcribed_text}\")_\nIch denke darüber nach...", parse_mode='Markdown')
+        await respond(update, context)
+
+    except Exception as e:
+        logger.error(f"Fehler bei der Audio-Transkription: {e}")
+        await context.bot.send_message(chat_id=chat_id, text="Entschuldigung, ich konnte diese Sprachnachricht leider nicht verarbeiten.")
+    finally:
+         if os.path.exists(tmp_path):
+             os.remove(tmp_path)
+
 if __name__ == '__main__':
     if not TELEGRAM_TOKEN:
         logger.error("TELEGRAM_TOKEN fehlt in der .env Datei. Bitte konfigurieren!")
@@ -273,6 +330,7 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('start', start))
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), respond))
     application.add_handler(MessageHandler(filters.Document.ALL, handle_document))
+    application.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, handle_audio))
     
     logger.info("Star Trek SOUL Chatbot wird hochgefahren...")
     application.run_polling()
