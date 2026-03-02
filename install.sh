@@ -155,6 +155,8 @@ Type=simple
 User=$USER
 WorkingDirectory=$INSTALL_DIR
 Environment="PATH=$INSTALL_DIR/venv/bin"
+# Kurze Pause einlegen, um sicherzugehen, dass Ollama nach einem unsauberen Reboot komplett hochgefahren ist
+ExecStartPre=/bin/sleep 10
 ExecStart=$INSTALL_DIR/venv/bin/python bot.py
 Restart=always
 RestartSec=10
@@ -166,6 +168,11 @@ EOL
 sudo systemctl daemon-reload
 sudo systemctl enable st_chatbot
 sudo systemctl restart st_chatbot || echo "Konnte Dienst nicht starten. Eventuell fehlen Dateien in $INSTALL_DIR."
+
+# Admin Tool ausführbar machen (falls vorhanden)
+if [ -f "$INSTALL_DIR/admin.sh" ]; then
+    chmod +x "$INSTALL_DIR/admin.sh"
+fi
 
 echo ""
 echo -e "${BLUE}=================================================${NC}"
