@@ -177,9 +177,12 @@ sudo systemctl daemon-reload
 sudo systemctl enable st_chatbot
 sudo systemctl restart st_chatbot || echo "Konnte Dienst nicht starten. Eventuell fehlen Dateien in $INSTALL_DIR."
 
-# Admin Tool ausführbar machen (falls vorhanden)
+# Admin Tool und Auto-Updater ausführbar machen (falls vorhanden)
 if [ -f "$INSTALL_DIR/admin.sh" ]; then
     chmod +x "$INSTALL_DIR/admin.sh"
+fi
+if [ -f "$INSTALL_DIR/update.sh" ]; then
+    chmod +x "$INSTALL_DIR/update.sh"
 fi
 
 echo ""
