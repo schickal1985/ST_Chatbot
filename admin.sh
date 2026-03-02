@@ -30,9 +30,10 @@ echo "2) 📝 Live-Logs ansehen (Fehlersuche)"
 echo "3) 🔑 Telegram Token oder Modell ändern"
 echo "4) 🔄 Bot-Dienst neustarten"
 echo "5) 🖥️ System-Check (RAM) & Modell-Empfehlung"
-echo "6) ❌ Beenden"
+echo "6) ⬇️  Bot updaten (GitHub Auto-Updater)"
+echo "7) ❌ Beenden"
 echo ""
-read -p "Wähle eine Option [1-6]: " OPTION
+read -p "Wähle eine Option [1-7]: " OPTION
 
 case $OPTION in
     1)
@@ -98,6 +99,17 @@ case $OPTION in
         echo -e "\n(Um das Modell zu wechseln, starte Option 3 im Admin-Tool und trage den Namen ein)"
         ;;
     6)
+        echo -e "\n${YELLOW}Starte Auto-Updater...${NC}"
+        if [ -x "./update.sh" ]; then
+            # Führe das Update-Skript aus. Da update.sh am Ende ggf. den Server 
+            # neu startet oder das Skript beendet, verlassen wir danach das Admin-Menü.
+            ./update.sh
+            exit 0
+        else
+            echo -e "${RED}Fehler: update.sh nicht gefunden oder nicht ausführbar.${NC}"
+        fi
+        ;;
+    7)
         echo "Beendet."
         exit 0
         ;;
