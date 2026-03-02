@@ -31,6 +31,14 @@ echo -e "${YELLOW}[1/3] Hole die neuesten Änderungen von GitHub...${NC}"
 git fetch origin main
 git reset --hard origin/main || git pull origin main
 
+# Git überschreibt lokal oft die Ausführrechte (x-bit), daher sofort nach dem Pull wiederherstellen:
+if [ -f "$INSTALL_DIR/admin.sh" ]; then
+    sudo chmod 755 "$INSTALL_DIR/admin.sh"
+fi
+if [ -f "$INSTALL_DIR/update.sh" ]; then
+    sudo chmod 755 "$INSTALL_DIR/update.sh"
+fi
+
 echo -e "${YELLOW}[2/3] Aktualisiere Python-Abhängigkeiten...${NC}"
 if [ -d "venv" ] && [ -f "requirements.txt" ]; then
     source venv/bin/activate
