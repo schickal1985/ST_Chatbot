@@ -111,8 +111,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(f"Fehler beim Senden der Start-Nachricht: {e}")
 
-async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_message = update.message.text
+async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE, user_message: str = None):
+    # Nimmt entweder die explizit übergebene Nachricht (z.B. von Whisper) oder den normalen Text
+    user_message = user_message or update.message.text
     chat_id = str(update.effective_chat.id)
     message_id = str(update.message.message_id)
     
@@ -312,10 +313,10 @@ async def handle_audio(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         logger.info(f"Transkription erfolgreich: {transcribed_text}")
         
-        # Wir tun so, als hätte der Nutzer diesen Text geschrieben und leiten ihn an den normalen Chat weiter
-        update.message.text = transcribed_text
+        # Wir übergeben den transkribierten Text nun direkt an respond, anstatt
+        # das (in neueren API Versionen read-only) message.text Attribut manipulieren zu wollen.
         await context.bot.send_message(chat_id=chat_id, text=f"_(Erkannter Text: \"{transcribed_text}\")_\nIch denke darüber nach...", parse_mode='Markdown')
-        await respond(update, context)
+        await respond(update, context, user_message=transcribed_text)
 
     except Exception as e:
         error_details = traceback.format_exc()
@@ -325,7 +326,7 @@ async def handle_audio(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if "ffmpeg" in str(e).lower() or "ffprobe" in str(e).lower():
             await context.bot.send_message(chat_id=chat_id, text="Entschuldigung, auf meinem Server fehlt das Programm 'ffmpeg', um Sprachnachrichten lesen zu können. Bitte den Admin kontaktieren.")
         else:
-            await context.bot.send_message(chat_id=chat_id, text=f"Entschuldigung, ich konnte diese Sprachnachricht leider nicht verarbeiten. (DEBUG: {str(e)})")
+            await context.bot.send_message(chat_id=chat_id, text="Entschuldigung, ich konnte diese Sprachnachricht leider nicht verarbeiten.")
     finally:
          if os.path.exists(tmp_path):
              os.remove(tmp_path)
