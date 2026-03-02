@@ -13,7 +13,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}=================================================${NC}"
-echo -e "${GREEN}        Star Trek SOUL Chatbot Installer         ${NC}"
+echo -e "${GREEN}        Star Trek Chatbot Installer         ${NC}"
 echo -e "${BLUE}=================================================${NC}"
 echo ""
 
@@ -180,7 +180,7 @@ SERVICE_FILE="/etc/systemd/system/st_chatbot.service"
 echo "Erstelle systemd Hintergrunddienst..."
 sudo bash -c "cat > $SERVICE_FILE" << EOL
 [Unit]
-Description=Star Trek SOUL Chatbot (Telegram Bot mit Ollama)
+Description=Star Trek Chatbot (Telegram Bot mit Ollama)
 After=network.target ollama.service
 
 [Service]

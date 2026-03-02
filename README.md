@@ -1,11 +1,11 @@
-# ST_Chatbot (SOUL)
+# ST_Chatbot
 
 Ein lokaler, auf den Prinzipien der Sternenflotte und dem „Star Trek Optimismus“ basierender KI-Chatbot für Telegram. Die KI ist durch Radikale Empathie, Friedfertigkeit, IDIC (Infinite Diversity in Infinite Combinations) und Optimismus gekennzeichnet.
 
 Dieses Projekt verbindet:
 1. Das Telegram Bot-Ökosystem (zur Interaktion über das Smartphone)
 2. Ein lokales LLM via [Ollama](https://ollama.com/) (absoluter Datenschutz, 100% lokal ausgeführt)
-3. Eine portables Markdown-Manifest (`SOUL.md`), welches der KI ihren Verhaltenscodex aufzwingt.
+3. Eine portables Markdown-Manifest (`system_prompt.md`), welches der KI ihren Verhaltenscodex aufzwingt.
 
 ## Ein-Klick-Installation (Ubuntu / Debian)
 
@@ -52,7 +52,7 @@ Das System ist komplett portabel konzipiert. Die Konfiguration läuft rein über
    ```
 
 ## Wie beeinflusse ich das Verhalten?
-Öffne einfach die [SOUL.md](SOUL.md) und ändere den Text. Sobald der Bot (das Skript `bot.py`) das nächste Mal gestartet wird, lädt er die Instruktionen frisch ein.
+Öffne einfach die [system_prompt.md](system_prompt.md) und ändere den Text. Sobald der Bot (das Skript `bot.py`) das nächste Mal gestartet wird, lädt er die Instruktionen frisch ein.
 
 ## Weiterentwicklung
 Aktuell lauscht der Bot nur auf Text und antwortet textlich. Später kann man dies erweitern um:

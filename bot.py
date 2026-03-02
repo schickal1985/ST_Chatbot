@@ -32,12 +32,12 @@ OLLAMA_EMBED_MODEL = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
 
 # --- 1. System Prompt ---
 def load_system_prompt():
-    prompt_path = os.path.join(os.path.dirname(__file__), "SOUL.md")
+    prompt_path = os.path.join(os.path.dirname(__file__), "system_prompt.md")
     try:
         with open(prompt_path, "r", encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
-        logger.warning("SOUL.md wurde nicht gefunden! Verwende Fallback-Prompt.")
+        logger.warning("system_prompt.md wurde nicht gefunden! Verwende Fallback-Prompt.")
         return "Du bist eine hilfreiche KI."
 
 SYSTEM_PROMPT = load_system_prompt()
@@ -345,5 +345,5 @@ if __name__ == '__main__':
     application.add_handler(MessageHandler(filters.Document.ALL, handle_document))
     application.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, handle_audio))
     
-    logger.info("Star Trek SOUL Chatbot wird hochgefahren...")
+    logger.info("Star Trek Chatbot wird hochgefahren...")
     application.run_polling()

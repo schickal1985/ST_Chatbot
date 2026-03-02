@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 INSTALL_DIR="$HOME/ST_Chatbot"
 
 echo -e "${BLUE}=================================================${NC}"
-echo -e "${GREEN}        Star Trek SOUL Chatbot Updater           ${NC}"
+echo -e "${GREEN}        Star Trek Chatbot Updater           ${NC}"
 echo -e "${BLUE}=================================================${NC}"
 echo ""
 

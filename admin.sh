@@ -14,7 +14,7 @@ INSTALL_DIR="$HOME/ST_Chatbot"
 cd "$INSTALL_DIR" || exit 1
 
 echo -e "${BLUE}=================================================${NC}"
-echo -e "${GREEN}      Star Trek SOUL Chatbot - Admin Tool        ${NC}"
+echo -e "${GREEN}      Star Trek Chatbot - Admin Tool        ${NC}"
 echo -e "${BLUE}=================================================${NC}"
 
 if [ ! -f .env ]; then
