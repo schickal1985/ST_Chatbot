@@ -52,3 +52,14 @@ echo ""
 echo -e "${BLUE}=================================================${NC}"
 echo -e "${GREEN}Update erfolgreich abgeschlossen! Lebe lang und in Frieden! 🖖${NC}"
 echo -e "${BLUE}=================================================${NC}"
+
+echo ""
+echo -e "${YELLOW}Hinweis: Manchmal ist nach größeren Updates (oder KI-Modellwechseln) ein kompletter Server-Neustart sinnvoll, um den Arbeitsspeicher restlos zu leeren.${NC}"
+read -p "Möchtest du den gesamten Ubuntu-Server jetzt neu starten? (j/N): " REBOOT_SERVER < /dev/tty
+if [[ "$REBOOT_SERVER" =~ ^[Jj] ]]; then
+    echo -e "${RED}Server wird in 5 Sekunden neu gestartet! Deine SSH-Verbindung wird abbrechen...${NC}"
+    sleep 5
+    sudo reboot
+else
+    echo -e "${GREEN}Server bleibt online. Der Bot läuft mit dem Update weiter.${NC}"
+fi
