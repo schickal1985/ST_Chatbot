@@ -75,6 +75,16 @@ if [[ "$OLLAMA_IP" == "localhost" || "$OLLAMA_IP" == "127.0.0.1" ]]; then
     echo -e "${GREEN}-> Klassische lokale Installation gewählt.${NC}"
 else
     echo -e "${GREEN}-> Remote-Architektur gewählt. KI tickt auf: $OLLAMA_BASE_URL${NC}"
+    echo -e "\n${YELLOW}🚨 WICHTIGER HINWEIS FÜR WINDOWS-NUTZER 🚨${NC}"
+    echo "Damit dieser Ubuntu-Server deinen Windows-PC im Netzwerk erreichen kann,"
+    echo "MUSST du auf deinem Windows-Rechner zwingend folgende System-Einstellung treffen:"
+    echo "1. Drücke die Windows-Taste und suche nach 'Umgebungsvariablen für dieses Konto bearbeiten'"
+    echo "2. Klicke auf 'Neu...'"
+    echo "3. Name: OLLAMA_HOST"
+    echo "4. Wert: 0.0.0.0"
+    echo "5. Beende Ollama rechts unten in der Taskleiste (Rechtsklick -> Quit) und starte es neu."
+    echo "Ohne diesen Schritt blockiert Windows alle Anfragen von diesem Chatbot!\n"
+    sleep 3
 fi
 
 # 5. Bot Konfiguration abfragen
