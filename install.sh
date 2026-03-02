@@ -28,7 +28,7 @@ sudo apt-get upgrade -y
 sudo apt-get dist-upgrade -y
 
 echo -e "\n${YELLOW}Installiere benötigte Basis-Programme (Python, Git, Curl)...${NC}"
-sudo apt-get install -y python3 python3-pip python3-venv curl git
+sudo apt-get install -y python3 python3-pip python3-venv curl git ffmpeg
 
 # 2. Ollama überprüfen und ggf. installieren
 echo -e "${YELLOW}[2/5] Prüfe lokales KI-System (Ollama)...${NC}"
