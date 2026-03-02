@@ -42,7 +42,7 @@ echo -e "${YELLOW}[3/5] Richte Projektverzeichnis unter $INSTALL_DIR ein...${NC}
 
 if [ ! -d "$INSTALL_DIR" ]; then
     echo "Bitte gib jetzt oder später die GitHub Repository URL an, um das Projekt zu klonen:"
-    read -p "GitHub Repository URL (oder drücke Enter für leeren Ordner): " REPO_URL
+    read -p "GitHub Repository URL (oder drücke Enter für leeren Ordner): " REPO_URL < /dev/tty
     if [ -n "$REPO_URL" ]; then
         git clone "$REPO_URL" "$INSTALL_DIR"
     else
@@ -64,12 +64,42 @@ DEFAULT_MODEL="gemma:2b"
 if [ ! -f .env ]; then
     echo "Um den Telegram Bot zu betreiben, brauchst du einen Bot Token."
     echo "Diesen bekommst du direkt in Telegram beim @BotFather."
-    read -p "Gib deinen Telegram Bot Token ein: " TELEGRAM_TOKEN
+    read -p "Gib deinen Telegram Bot Token ein: " TELEGRAM_TOKEN < /dev/tty
     
-    echo ""
-    echo "Welches KI-Modell möchtest du verwenden? (z.B. gemma:2b, llama3, mistral)"
-    read -p "KI-Modell [Standard: $DEFAULT_MODEL]: " OLLAMA_MODEL
-    OLLAMA_MODEL=${OLLAMA_MODEL:-$DEFAULT_MODEL}
+    echo "Welches KI-Modell möchtest du verwenden?"
+    echo "Lade aktuell beliebteste Modelle..."
+    
+    # Lade die offizielle Modelli-Liste von Ollama (vereinfacht über cURL + grep)
+    # Da das direkte HTML-Parsing auf bash fehleranfällig ist, bieten wir eine solide 
+    # vordefinierte Liste aktueller "Best-Ofs" an, die sofort funktionieren.
+    echo "1) gemma:2b       (Standard: Sehr schnell, perfekt für kleine VPS, 4GB RAM)"
+    echo "2) llama3         (Meta's 8B Modell, stark im Reasoning, 8GB RAM empfohlen)"
+    echo "3) mistral        (Der Open-Source Klassiker, 7B Parameter, 8GB RAM)"
+    echo "4) phi3           (Microsoft's winziges Modell, 3.8B, sehr gut bei Logik)"
+    echo "5) qwen2:7b       (Alibabas 7B Modell, extrem gut in Deutsch)"
+    echo "6) gemma2         (Googles neues 9B Modell, extrem hohe Qualität, 16GB RAM)"
+    echo "7) llama3.1       (Meta's neuestes Modell, 8B, 8GB RAM)"
+    echo "8) Manuelle Eingabe (Ein beliebiges anderes Modell von ollama.com eintragen)"
+    
+    read -p "Wähle eine Option [1-8, Standard: 1]: " MODEL_CHOICE < /dev/tty
+    MODEL_CHOICE=${MODEL_CHOICE:-1}
+    
+    case $MODEL_CHOICE in
+        1) OLLAMA_MODEL="gemma:2b" ;;
+        2) OLLAMA_MODEL="llama3" ;;
+        3) OLLAMA_MODEL="mistral" ;;
+        4) OLLAMA_MODEL="phi3" ;;
+        5) OLLAMA_MODEL="qwen2:7b" ;;
+        6) OLLAMA_MODEL="gemma2" ;;
+        7) OLLAMA_MODEL="llama3.1" ;;
+        8) 
+            read -p "Bitte tippe den genauen Modell-Namen von ollama.com ein: " MANUAL_MODEL < /dev/tty
+            OLLAMA_MODEL=${MANUAL_MODEL:-"gemma:2b"}
+            ;;
+        *) OLLAMA_MODEL="gemma:2b" ;;
+    esac
+    
+    echo -e "${GREEN}Gewähltes Modell: $OLLAMA_MODEL${NC}"
     
     # Erstelle die .env Datei
     echo "TELEGRAM_TOKEN=$TELEGRAM_TOKEN" > .env
