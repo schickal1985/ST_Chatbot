@@ -181,7 +181,7 @@ After=network.target ollama.service
 Type=simple
 User=$USER
 WorkingDirectory=$INSTALL_DIR
-Environment="PATH=$INSTALL_DIR/venv/bin"
+Environment="PATH=$INSTALL_DIR/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 # Kurze Pause einlegen, um sicherzugehen, dass Ollama nach einem unsauberen Reboot komplett hochgefahren ist
 ExecStartPre=/bin/sleep 10
 ExecStart=$INSTALL_DIR/venv/bin/python bot.py
