@@ -156,6 +156,11 @@ echo -e "${YELLOW}[5/5] Richte Python-Umgebung und Systemdienst ein...${NC}"
 if [ -f "requirements.txt" ]; then
     python3 -m venv venv
     source venv/bin/activate
+    
+    echo -e "${YELLOW}Installiere schlanke CPU-Version von PyTorch (spart ca. 4GB Speicherplatz!)...${NC}"
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+    
+    echo -e "${YELLOW}Installiere restliche Python-Abhängigkeiten...${NC}"
     pip install -r requirements.txt
     deactivate
 else
