@@ -119,13 +119,16 @@ async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE, user_messa
     
     await context.bot.send_chat_action(chat_id=chat_id, action='typing')
     
-    # 1. Gedächtnis abrufen (RAG)
+    # 1. Gedächtnis abrufen (RAG) - asynchron im Hintergrund ausführen
     try:
-        memory_results = collection.query(
-            query_texts=[user_message],
-            n_results=3,
-            where={"chat_id": chat_id} # Nur Erinnerungen aus diesem Chat!
-        )
+        def get_memory():
+            return collection.query(
+                query_texts=[user_message],
+                n_results=3,
+                where={"chat_id": chat_id} # Nur Erinnerungen aus diesem Chat!
+            )
+            
+        memory_results = await asyncio.to_thread(get_memory)
         memory_context = ""
         if memory_results['documents'] and memory_results['documents'][0]:
             memory_context = "Erinnerungen aus bisherigen Unterhaltungen:\n"
@@ -136,12 +139,12 @@ async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE, user_messa
         logger.error(f"Fehler beim Abrufen des Gedächtnisses: {e}")
         memory_context = ""
 
-    # 2. Web-Suche auslösen (falls nötig)
+    # 2. Web-Suche auslösen (falls nötig) - asynchron
     search_context = ""
     try:
         if needs_web_search(user_message):
             logger.info(f"Führe Web-Suche aus für: {user_message}")
-            result = perform_web_search(user_message)
+            result = await asyncio.to_thread(perform_web_search, user_message)
             if result:
                 search_context = result + "\n\n"
     except Exception as e:
@@ -165,19 +168,27 @@ async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE, user_messa
     try:
         # Erhöhtes Timeout (15 Minuten), um auf schwachen VPS (ohne GPU) 
         # Abstürze bei gleichzeitiger Audio-Transkription zu vermeiden
-        response = requests.post(OLLAMA_API_URL, json=payload, timeout=900)
-        response.raise_for_status()
-        bot_reply = response.json().get("response", "Entschuldigung, ich konnte gerade keine klare Antwort formulieren.")
+        # ACHTUNG: Der Requests-Call MUSS zwingend im asyncio Threadpool laufen,
+        # da er sonst die asynchrone Telegram Event-Loop von python-telegram-bot blockiert, 
+        # was bei großen Modellen wie gemma3:12b sofort nach 30s zu einem fatalen SIGKILL durch systemd führt!
+        def call_ollama():
+            response = requests.post(OLLAMA_API_URL, json=payload, timeout=900)
+            response.raise_for_status()
+            return response.json().get("response", "Entschuldigung, ich konnte gerade keine klare Antwort formulieren.")
+            
+        bot_reply = await asyncio.to_thread(call_ollama)
         
         # 4. Verlauf ins Gedächtnis speichern!
         try:
             # Wir speichern sowohl die Frage als auch die Antwort als ein "Wissenspaket"
             interaction_text = f"Nutzer sagte: {user_message} | Ich antwortete: {bot_reply}"
-            collection.add(
-                documents=[interaction_text],
-                metadatas=[{"chat_id": chat_id, "type": "interaction"}],
-                ids=[f"msg_{chat_id}_{message_id}"]
-            )
+            def add_to_memory():
+                collection.add(
+                    documents=[interaction_text],
+                    metadatas=[{"chat_id": chat_id, "type": "interaction"}],
+                    ids=[f"msg_{chat_id}_{message_id}"]
+                )
+            await asyncio.to_thread(add_to_memory)
         except Exception as e:
             logger.error(f"Konnte Interaktion nicht ins Gedächtnis speichern: {e}")
 
