@@ -110,7 +110,8 @@ if [ ! -f .env ]; then
     
     # System-Check (RAM) für Modell-Empfehlung
     echo -e "\n${YELLOW}Führe System-Check aus (RAM)...${NC}"
-    TOTAL_MEM=$(free -m | awk '/^Mem:/{print $2}')
+    TOTAL_MEM=$(free -m | awk 'NR==2{print $2}')
+    TOTAL_MEM=${TOTAL_MEM:-4000} # Fallback to 4GB if parsing fails entirely to prevent script crash
     TOTAL_MEM_GB=$(awk "BEGIN {printf \"%.1f\", $TOTAL_MEM/1024}")
     
     echo -e "Erkannter Arbeitsspeicher: ${GREEN}${TOTAL_MEM_GB} GB RAM${NC}\n"
