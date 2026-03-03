@@ -125,10 +125,10 @@ if [ ! -f .env ]; then
         echo -e "💡 Empfehlung: Option 1 (${GREEN}gemma:2b${NC} - sehr schnell) oder Option 2 (${GREEN}llama3${NC} - lastet RAM voll aus)"
     elif [ "$TOTAL_MEM" -lt 15000 ]; then
         echo -e "Dein System hat 8-16 GB RAM. Hervorragend für starke Modelle!"
-        echo -e "💡 Empfehlung: Option 7 (${GREEN}llama3.1${NC}) oder Option 6 (${GREEN}gemma2${NC})"
+        echo -e "💡 Empfehlung: Option 7 (${GREEN}llama3.1${NC}), Option 6 (${GREEN}gemma2${NC}) oder Option 8 (${GREEN}gemma3:12b${NC})"
     else
         echo -e "Dein System ist ein echtes Biest! Du hast über 16 GB RAM."
-        echo -e "💡 Empfehlung: Option 7 (${GREEN}llama3.1${NC}) oder Option 6 (${GREEN}gemma2${NC})"
+        echo -e "💡 Empfehlung: Option 8 (${GREEN}gemma3:12b${NC}) oder Option 7 (${GREEN}llama3.1${NC})"
     fi
     echo ""
     
@@ -158,9 +158,10 @@ if [ ! -f .env ]; then
     echo "5) qwen2:7b       (Alibabas 7B Modell, extrem gut in Deutsch)"
     echo "6) gemma2         (Googles neues 9B Modell, extrem hohe Qualität)"
     echo "7) llama3.1       (Meta's neuestes Modell, 8B)"
-    echo "8) Manuelle Eingabe (Ein beliebiges anderes Modell von ollama.com eintragen)"
+    echo "8) gemma3:12b     (Googles aktuellstes 12B Modell - fantastisch bei 16GB RAM)"
+    echo "9) Manuelle Eingabe (Ein beliebiges anderes Modell von ollama.com eintragen)"
     
-    read -p "Wähle eine Option [1-8, Standard: 1]: " MODEL_CHOICE < /dev/tty
+    read -p "Wähle eine Option [1-9, Standard: 1]: " MODEL_CHOICE < /dev/tty
     MODEL_CHOICE=${MODEL_CHOICE:-1}
     
     case $MODEL_CHOICE in
@@ -171,7 +172,8 @@ if [ ! -f .env ]; then
         5) OLLAMA_MODEL="qwen2:7b" ;;
         6) OLLAMA_MODEL="gemma2" ;;
         7) OLLAMA_MODEL="llama3.1" ;;
-        8) 
+        8) OLLAMA_MODEL="gemma3:12b" ;;
+        9) 
             read -p "Bitte tippe den genauen Modell-Namen von ollama.com ein: " MANUAL_MODEL < /dev/tty
             OLLAMA_MODEL=${MANUAL_MODEL:-"gemma:2b"}
             ;;
