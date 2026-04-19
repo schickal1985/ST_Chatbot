@@ -54,8 +54,16 @@ Das System ist komplett portabel konzipiert. Die Konfiguration läuft rein über
 ## Wie beeinflusse ich das Verhalten?
 Öffne einfach die [system_prompt.md](system_prompt.md) und ändere den Text. Sobald der Bot (das Skript `bot.py`) das nächste Mal gestartet wird, lädt er die Instruktionen frisch ein.
 
+## Wie wechsle ich das KI-Modell nachträglich?
+Du kannst das verwendete Sprachmodell jederzeit ändern. Da sich Open-Source Modelle rasend schnell weiterentwickeln, ist dies sehr nützlich.
+1. Führe das Administrations-Tool aus: `./admin.sh` (und wähle Option 3) oder bearbeite die `.env` Datei direkt (z.B. mit `nano .env`).
+2. Ändere die Zeile `OLLAMA_MODEL=gemma3:12b` zu deinem gewünschten Modell (z.B. `OLLAMA_MODEL=llama3.1`).
+3. Speichere die Datei ab.
+4. Lade das neue Modell herunter, falls es noch nicht auf dem Server ist: `ollama pull llama3.1`
+5. Starte den Bot neu: `./admin.sh` (Option 4) oder `sudo systemctl restart st_chatbot`.
+
 ## Weiterentwicklung
-Aktuell lauscht der Bot nur auf Text und antwortet textlich. Später kann man dies erweitern um:
+Aktuell lauscht der Bot auf Text, Audio und Dokumente. Später kann man dies erweitern um:
 - Web-UI für einfache Änderungen
 - Spracherkennung (Voice Messages in Text)
 - Gedächtnis (Memory-Vektor-Datenbanken) für lange Gesprächshistorien.

@@ -76,7 +76,8 @@ case $OPTION in
     5)
         echo -e "\n${YELLOW}Führe System-Check aus...${NC}"
         # Hole den totalen RAM in MB (Linux)
-        TOTAL_MEM=$(free -m | awk '/^Mem:/{print $2}')
+        TOTAL_MEM=$(free -m | awk 'NR==2{print $2}')
+        TOTAL_MEM=${TOTAL_MEM:-4000}
         TOTAL_MEM_GB=$(awk "BEGIN {printf \"%.1f\", $TOTAL_MEM/1024}")
         
         echo -e "Erkannter Arbeitsspeicher (RAM): ${GREEN}${TOTAL_MEM_GB} GB${NC}\n"
@@ -90,10 +91,10 @@ case $OPTION in
             echo -e "Empfohlen: ${GREEN}gemma:2b${NC} (Sehr schnell), ${GREEN}llama3${NC} (Gut, aber braucht fast allen RAM), ${GREEN}phi3${NC}"
         elif [ "$TOTAL_MEM" -lt 15000 ]; then
             echo -e "Dein System hat etwa 8-16 GB RAM. Hervorragend für starke Modelle!"
-            echo -e "Empfohlen: ${GREEN}llama3.1${NC}, ${GREEN}gemma2:9b${NC}, ${GREEN}mistral${NC}"
+            echo -e "Empfohlen: ${GREEN}gemma3:12b${NC}, ${GREEN}llama3.1${NC}, ${GREEN}gemma2:9b${NC}, ${GREEN}mistral${NC}"
         else
             echo -e "Dein System hat über 16 GB RAM. Du kannst fast alles lokal laufen lassen!"
-            echo -e "Empfohlen: ${GREEN}llama3.1${NC}, ${GREEN}gemma2:9b${NC}, oder experimentiere mit großen Modellen wie ${GREEN}command-r${NC} oder ${GREEN}mixtral${NC}"
+            echo -e "Empfohlen: ${GREEN}gemma3:12b${NC}, ${GREEN}llama3.1${NC}, oder experimentiere mit ganz großen Modellen wie ${GREEN}command-r${NC}"
         fi
         
         echo -e "\n(Um das Modell zu wechseln, starte Option 3 im Admin-Tool und trage den Namen ein)"
